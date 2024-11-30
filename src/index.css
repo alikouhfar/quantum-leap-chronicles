@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: Shabnam;
+    src: url("/src/assets/fonts/shabnam/Farsi-Digits-Without-Latin/Shabnam-FD-WOL.eot");
+    src:
+      url("/src/assets/fonts/shabnam/Farsi-Digits-Without-Latin/Shabnam-FD-WOL.eot?#iefix")
+        format("Shabnam-opentype"),
+      url("/src/assets/fonts/shabnam/Farsi-Digits-Without-Latin/Shabnam-FD-WOL.woff")
+        format("woff"),
+      url("/src/assets/fonts/shabnam/Farsi-Digits-Without-Latin/Shabnam-FD-WOL.ttf")
+        format("truetype");
+    font-weight: normal;
+    font-style: normal;
+  }
+}
+
+* {
+  font-family: "Shabnam" !important;
+}
