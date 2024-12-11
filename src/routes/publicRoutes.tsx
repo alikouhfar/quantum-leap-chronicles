@@ -1,6 +1,7 @@
 import { RouteObject } from "react-router";
 import MainLayout from "../layouts/MainLayout";
 import AuthLayout from "../layouts/AuthLayout";
+import { LoginPage } from "../pages/LoginPage";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -25,7 +26,7 @@ const publicRoutes: RouteObject[] = [
     path: "",
     element: <AuthLayout />,
     children: [
-      { path: "login", element: <p>Login Page</p> },
+      { path: "login", element: <LoginPage /> },
       { path: "signup", element: <p>Signup Page</p> },
     ],
   },
