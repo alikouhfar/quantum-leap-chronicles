@@ -4,18 +4,12 @@ import {
   Box,
   Button,
   Paper,
-  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import * as Yup from "yup";
-import {
-  keyCloakCheckState,
-  keyCloakLogin,
-  keyCloakLogout,
-} from "../../../utils/keyCloakHelper";
 
 function CustomErrorMessage({ name }) {
   return (
@@ -67,7 +61,6 @@ function CustomErrorMessage({ name }) {
 }
 const loginDataValidationSchema = Yup.object({
   email: Yup.string()
-    .email("ایمیل نامعتبر")
     .min(1, "لطفا ایمیل خود را وارد کنید")
     .required("لطفا ایمیل خود را وارد کنید"),
   password: Yup.string()
@@ -75,23 +68,40 @@ const loginDataValidationSchema = Yup.object({
     .min(1, "لطفا رمز عبور خود را وارد کنید")
     .required("لطفا رمز عبور خود را وارد کنید"),
 });
+const handleSubmit = async (values) => {
+  const { email, password } = values;
+  const url =
+    "http://10.10.10.133:7080/realms/MassTest/protocol/openid-connect/token";
+  const data = new URLSearchParams();
+  data.append("client_id", "UserManagement");
+  data.append("username", email);
+  data.append("password", password);
+  data.append("grant_type", "password");
+  data.append("client_secret", "jLfPve2AUSXuXnmAKQKMeQqHFO8LVQit");
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: data.toString(),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const responseData = await response.json();
+    console.log("Response:", responseData);
+    toast.success("ورود موفقیت آمیز بود", { position: "bottom-right" });
+  } catch (error) {
+    console.error("Error fetching token:", error);
+    toast.error(error.message, { position: "bottom-right" });
+  }
+};
 
 export function LoginPanel() {
-  const [toastOpen, setToastOpen] = useState(false);
-
-  const handleSubmit = (values, { resetForm }) => {
-    setToastOpen(true);
-    console.log(values);
-  };
-
-  const handleToastClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setToastOpen(false);
-  };
-
-  keyCloakCheckState();
   //--------------------------------------------------------------------------------------------
   return (
     <Paper
@@ -123,12 +133,6 @@ export function LoginPanel() {
           borderRadius: 6,
           zIndex: -1,
         }}
-      />
-      <Snackbar
-        open={toastOpen}
-        autoHideDuration={3000}
-        onClose={handleToastClose}
-        message="ورود با موفقیت انجام شد"
       />
       <Avatar
         sx={{
@@ -162,11 +166,11 @@ export function LoginPanel() {
         }}
         validationSchema={loginDataValidationSchema}
         onSubmit={(values, { resetForm }) => {
-          handleSubmit(values, { resetForm });
+          handleSubmit(values);
           resetForm();
         }}
       >
-        {({ touched, errors }) => (
+        {() => (
           <Form>
             <div>
               <Field
@@ -314,6 +318,7 @@ export function LoginPanel() {
               type="submit"
               variant="contained"
               fullWidth
+              disabled={isSubmitting}
               sx={{
                 mt: 2,
                 mb: 2,
@@ -327,41 +332,16 @@ export function LoginPanel() {
                 color: "white",
               }}
             >
-              ورود
-            </Button>
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{
-                mt: 2,
-                mb: 2,
-                height: "42px",
-                padding: 1,
-                fontSize: 16,
-                borderRadius: 8,
-              }}
-              style={{
-                backgroundColor: "rgba(10,10,10,0.2)",
-                color: "white",
-              }}
-              onClick={keyCloakLogin}
-            >
-              ورود با KeyCloak
+              {isSubmitting ? "در حال ورود" : "ورود"}
             </Button>
           </Form>
         )}
       </Formik>
       <Typography sx={{ marginTop: "auto", fontSize: "10px", color: "white" }}>
-        با ورود به حساب خود شما با قوانین ما موفقت کردید. در قبال اکشن های خود
+        با ورود به حساب خود شما با قوانین ما موافقت کردید. در قبال اعمال خود
         پاسخگو خواهید بود
       </Typography>
-      <button
-        onClick={() => {
-          keyCloakLogout();
-        }}
-      >
-        Logout
-      </button>
+      <Toaster />
     </Paper>
   );
   //--------------------------------------------------------------------------------------------
